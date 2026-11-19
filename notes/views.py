@@ -5,13 +5,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import NoteForm
 from .models import Note
 
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import NoteForm
 from .models import Category, Note
 
 
 def index(request):
-    notes = Note.objects.all()
+    # 1. Оптимизация: JOIN для category и owner, отдельный запрос для tags
+    notes = Note.objects.select_related("category", "owner").prefetch_related("tags")
+
+    # Фильтры
     if request.GET.get("category"):
         notes = notes.filter(category_id=request.GET["category"])
     if request.GET.get("active"):
@@ -19,10 +23,15 @@ def index(request):
     if request.GET.get("q"):
         notes = notes.filter(title__icontains=request.GET["q"])
 
-    total = len(notes)  # Намеренно медленно: загружает 100 000 объектов в память
-    notes = notes[:300]  # Показываем только 300
+    # 2. Считаем количество на стороне базы (SELECT COUNT(*))
+    total = notes.count()
 
-    categories = Category.objects.all()
+    # 3. Ограничиваем выборку 300 записями (LIMIT 300)
+    notes = notes[:300]
+
+    # 4. Считаем заметки для категорий одним запросом (GROUP BY)
+    categories = Category.objects.annotate(notes_count=Count("notes")).order_by("name")
+
     return render(request, "notes/note_list.html", {
         "notes": notes, "total": total, "categories": categories,
     })

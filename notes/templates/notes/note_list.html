@@ -6,7 +6,7 @@
     <select name="category">
       <option value="">Все категории</option>
       {% for c in categories %}
-        <option value="{{ c.pk }}">{{ c.name }} ({{ c.notes.count }})</option>
+        <option value="{{ c.pk }}">{{ c.name }} ({{ c.notes_count }})</option>
       {% endfor %}
     </select>
     <label><input type="checkbox" name="active" value="1"> Только невыполненные</label>
