@@ -16,7 +16,7 @@
   <p>Найдено: {{ total }}</p>
   <a class="btn" href="{% url 'notes:create' %}">+ Новая заметка</a>
 
-  {% for note in notes %}
+  {% for note in page_obj %}  <!-- Изменено на page_obj -->
     <article class="note {% if note.is_done %}done{% endif %}">
       <h2>{{ note.title }}</h2>
       <p>{{ note.text|truncatechars:150 }}</p>
@@ -28,4 +28,17 @@
       <a href="{% url 'notes:delete' note.pk %}">Удалить</a>
     </article>
   {% endfor %}
+
+  <!-- Блок пагинации -->
+  <div class="pagination" style="margin-top: 20px;">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.active %}&active=1{% endif %}">« Назад</a>
+    {% endif %}
+
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.active %}&active=1{% endif %}">Вперед »</a>
+    {% endif %}
+  </div>
 {% endblock %}

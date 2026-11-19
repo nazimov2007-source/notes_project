@@ -40,6 +40,10 @@ class Note(models.Model):
         ordering = ["-created_at"]
         verbose_name = "Заметка"
         verbose_name_plural = "Заметки"
+        indexes = [
+            models.Index(fields=["created_at"]),  # для сортировки по дате
+            models.Index(fields=["is_done"]),  # для фильтра "Только невыполненные"
+        ]
 
     def __str__(self):
         return self.title
